@@ -49,6 +49,13 @@ public class ClassUtil {
     }
 
     /**
+     * 加载类,默认初始化类
+     */
+    public static Class<?> loadClass(String className) {
+        return loadClass(className, true);
+    }
+
+    /**
      * 获取指定包下的所有类
      *
      * @param packageName 指定包的全限定名

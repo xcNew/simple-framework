@@ -1,9 +1,6 @@
 package com.xctian.framework;
 
-import com.xctian.framework.helper.BeanHelper;
-import com.xctian.framework.helper.ClassHelper;
-import com.xctian.framework.helper.ControllerHelper;
-import com.xctian.framework.helper.IocHelper;
+import com.xctian.framework.helper.*;
 import com.xctian.framework.utils.ClassUtil;
 
 /**
@@ -18,6 +15,8 @@ public class HelperLoader {
         Class<?>[] classList = {
                 ClassHelper.class,
                 BeanHelper.class,
+                // aop要在IOChelper之前加载因为要通过AOP获得代理对象才能通过IOChelper进行依赖注入
+                AopHelper.class,
                 IocHelper.class,
                 ControllerHelper.class
         };

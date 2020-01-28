@@ -1,6 +1,7 @@
 package com.xctian.framework.bean;
 
 import com.xctian.framework.utils.CastUtil;
+import com.xctian.framework.utils.CollectionUtil;
 
 import java.util.Map;
 
@@ -30,5 +31,12 @@ public class Param {
      */
     public Map<String,Object> getParamMap(){
         return paramMap;
+    }
+
+    /**
+     * 判空
+     */
+    public boolean isEmpty(){
+        return CollectionUtil.isEmpty(paramMap);
     }
 }

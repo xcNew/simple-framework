@@ -7,7 +7,10 @@ import com.xctian.framework.bean.View;
 import com.xctian.framework.helper.BeanHelper;
 import com.xctian.framework.helper.ControllerHelper;
 import com.xctian.framework.helper.PropertiesConfigHelper;
+import com.xctian.framework.helper.ServletHelper;
 import com.xctian.framework.utils.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -30,8 +33,10 @@ import java.util.Map;
  * @author xctian
  * @date 2020/1/23
  */
-@WebServlet(urlPatterns = "/*",loadOnStartup = 0)
+@WebServlet(urlPatterns = "/*", loadOnStartup = 0)
 public class DispatcherServlet extends HttpServlet {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherServlet.class);
 
     /**
      * init方法在构造器调用之后马上被调用，用来初始化Servlet，init方法在容器装入Servlet 时执行
@@ -58,81 +63,94 @@ public class DispatcherServlet extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //获取请求方法与路径并进行封装
-        String requestMethod = req.getMethod().toLowerCase();
-        String requestPath = req.getPathInfo();
-        // 获取Action处理器
-        Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
-        if (handler != null) {
-            // 通过hanlder获取controller类及实例
-            Class<?> controllerClass = handler.getControllerClass();
-            Object controllerBean = BeanHelper.getBean(controllerClass);
-            // 创建请求参数对象
-            Map<String, Object> paramMap = new HashMap<String, Object>();
-            // 请求体类型是application/x- www-form-urlencoded时，对该类型的请求内容提供了request.getParameter()方法来获取请求参数值
-            Enumeration<String> paramNames = req.getParameterNames();
-            while (paramNames.hasMoreElements()) {
-                String paramName = paramNames.nextElement();
-                String paramValue = req.getParameter(paramName);
-                paramMap.put(paramName, paramValue);
-            }
-            // 请求体内容是其它类型时，比如 multipart/form-data或application/json时，
-            // 无法通过request.getParameter()获取到请求内容，此时只能通过request.getInputStream()
-            // request.getInputStream()返回请求内容字节流，多用于文件上传
-            String body = CodecUtil.decodeURL(StreamUtil.getString(req.getInputStream()));
-            if (StringUtil.isNotEmpty(body)) {
-                String[] params = StringUtil.splitString(body, "&");
-                if (ArrayUtil.isNotEmpty(params)) {
-                    for (String param : params) {
-                        String[] array = StringUtil.splitString(param, "=");
-                        if (ArrayUtil.isNotEmpty(array) && array.length == 2) {
-                            String paramName = array[0];
-                            String paramValue = array[1];
-                            paramMap.put(paramName, paramValue);
-                        }
-                    }
-                }
-            }
-            Param param = new Param(paramMap);
-            // 通过反射调用Action方法
-            Method actionMethod = handler.getActionMethod();
-            Object res = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
-            // 处理Action方法返回值
-            if (res instanceof View) {
-                //返回JSP页面
-                View view = (View) res;
-                String path = view.getPath();
-                if (StringUtil.isNotEmpty(path)) {
-                    // response.sendRedirect(String location)方法中的参数location，如果不以“/”开头，
-                    // 表示相对于当前源组件的路径；如果以“/”开头，表示相对于当前服务器根路径的URL
-                    if (path.startsWith("/")) {
-                        resp.sendRedirect(req.getContextPath() + path);
-                    } else {
-                        Map<String, Object> model = view.getModel();
-                        for (Map.Entry<String, Object> entry : model.entrySet()) {
-                            req.setAttribute(entry.getKey(), entry.getValue());
-                        }
-                        req.getRequestDispatcher(PropertiesConfigHelper.getAppJspPath() + path).forward(req, resp);
-                    }
-                }
-            } else if (res instanceof Data) {
-                //若为Data类型，则返回JSON数据
-                Data data = (Data) res;
-                Object model = data.getModel();
-                if (model != null) {
-                    resp.setContentType("application/json");
-                    resp.setCharacterEncoding("UTF-8");
-                    // 这个out对象的作用是可以通过当前HttpServletResponse以流的方式响应数据到请求html或者jsp页面，可以在客户端输出
-                    PrintWriter writer = resp.getWriter();
-                    String json = JsonUtil.toJson(model);
-                    writer.write(json);
-                    writer.flush();;
-                    writer.close();
 
+        ServletHelper.init(req, resp);
+        try {
+            //获取请求方法与路径并进行封装
+            String requestMethod = req.getMethod().toLowerCase();
+            String requestPath = req.getPathInfo();
+            // 获取Action处理器
+            Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
+            if (handler != null) {
+                // 通过hanlder获取controller类及实例
+                Class<?> controllerClass = handler.getControllerClass();
+                Object controllerBean = BeanHelper.getBean(controllerClass);
+                // 创建请求参数对象
+                Map<String, Object> paramMap = new HashMap<String, Object>();
+                // 请求体类型是application/x- www-form-urlencoded时，对该类型的请求内容提供了request.getParameter()方法来获取请求参数值
+                Enumeration<String> paramNames = req.getParameterNames();
+                while (paramNames.hasMoreElements()) {
+                    String paramName = paramNames.nextElement();
+                    String paramValue = req.getParameter(paramName);
+                    paramMap.put(paramName, paramValue);
+                }
+                // 请求体内容是其它类型时，比如 multipart/form-data或application/json时，
+                // 无法通过request.getParameter()获取到请求内容，此时只能通过request.getInputStream()
+                // request.getInputStream()返回请求内容字节流，多用于文件上传
+                String body = CodecUtil.decodeURL(StreamUtil.getString(req.getInputStream()));
+                if (StringUtil.isNotEmpty(body)) {
+                    String[] params = StringUtil.splitString(body, "&");
+                    if (ArrayUtil.isNotEmpty(params)) {
+                        for (String param : params) {
+                            String[] array = StringUtil.splitString(param, "=");
+                            if (ArrayUtil.isNotEmpty(array) && array.length == 2) {
+                                String paramName = array[0];
+                                String paramValue = array[1];
+                                paramMap.put(paramName, paramValue);
+                            }
+                        }
+                    }
+                }
+                Param param = new Param(paramMap);
+                Object res;
+                // 通过反射调用Action方法
+                Method actionMethod = handler.getActionMethod();
+                if (!param.isEmpty()) {
+                    res = ReflectionUtil.invokeMethod(controllerBean, actionMethod, param);
+                } else {
+                    res = ReflectionUtil.invokeMethod(controllerBean, actionMethod);
+                }
+                // 处理Action方法返回值
+                if (res instanceof View) {
+                    //返回JSP页面
+                    View view = (View) res;
+                    String path = view.getPath();
+                    if (StringUtil.isNotEmpty(path)) {
+                        // response.sendRedirect(String location)方法中的参数location，如果不以“/”开头，
+                        // 表示相对于当前源组件的路径；如果以“/”开头，表示相对于当前服务器根路径的URL
+                        if (path.startsWith("/")) {
+                            resp.sendRedirect(req.getContextPath() + path);
+                        } else {
+                            Map<String, Object> model = view.getModel();
+                            for (Map.Entry<String, Object> entry : model.entrySet()) {
+                                req.setAttribute(entry.getKey(), entry.getValue());
+                            }
+                            req.getRequestDispatcher(PropertiesConfigHelper.getAppJspPath() + path).forward(req, resp);
+                        }
+                    }
+                } else if (res instanceof Data) {
+                    //若为Data类型，则返回JSON数据
+                    Data data = (Data) res;
+                    Object model = data.getModel();
+                    if (model != null) {
+                        resp.setContentType("application/json");
+                        resp.setCharacterEncoding("UTF-8");
+                        // 这个out对象的作用是可以通过当前HttpServletResponse以流的方式响应数据到请求html或者jsp页面，可以在客户端输出
+                        PrintWriter writer = resp.getWriter();
+                        String json = JsonUtil.toJson(model);
+                        writer.write(json);
+                        writer.flush();
+                        ;
+                        writer.close();
+
+                    }
                 }
             }
+        }catch (Exception e){
+            LOGGER.error("DispatcherServlet错误",e);
+            throw new RuntimeException(e);
+        }finally {
+            ServletHelper.destory();
         }
     }
-
-
 }

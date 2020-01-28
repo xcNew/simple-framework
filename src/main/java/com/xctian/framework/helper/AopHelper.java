@@ -1,9 +1,11 @@
 package com.xctian.framework.helper;
 
 import com.xctian.framework.annotation.Aspect;
+import com.xctian.framework.annotation.Service;
 import com.xctian.framework.proxy.AspectProxy;
 import com.xctian.framework.proxy.Proxy;
 import com.xctian.framework.proxy.ProxyManager;
+import com.xctian.framework.proxy.TransactionProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,23 @@ public class AopHelper {
      */
     public static Map<Class<?>, Set<Class<?>>> createProxyMap() {
         Map<Class<?>, Set<Class<?>>> proxyMap = new HashMap<Class<?>, Set<Class<?>>>();
+        addAspectProxy(proxyMap);
+        addTransactionProxy(proxyMap);
+        return proxyMap;
+    }
+
+    /**
+     * 添加事务代理到proxyMap
+     */
+    public static void addTransactionProxy(Map<Class<?>, Set<Class<?>>> proxyMap) {
+        Set<Class<?>> serviceClassSet = ClassHelper.getClassSetByAnnotation(Service.class);
+        proxyMap.put(TransactionProxy.class,serviceClassSet);
+    }
+
+    /**
+     * 添加普通切面代理到proxyMap
+     */
+    public static void addAspectProxy(Map<Class<?>, Set<Class<?>>> proxyMap) {
         Set<Class<?>> proxyClassSet = ClassHelper.getClassSetBySuper(AspectProxy.class);
         for (Class<?> proxyClass : proxyClassSet) {
             if (proxyClass.isAnnotationPresent(Aspect.class)) {
@@ -50,7 +69,6 @@ public class AopHelper {
                 proxyMap.put(proxyClass, targetClassSet);
             }
         }
-        return proxyMap;
     }
 
     /**

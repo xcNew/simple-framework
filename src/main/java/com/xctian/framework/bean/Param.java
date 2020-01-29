@@ -2,7 +2,10 @@ package com.xctian.framework.bean;
 
 import com.xctian.framework.utils.CastUtil;
 import com.xctian.framework.utils.CollectionUtil;
+import com.xctian.framework.utils.StringUtil;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +20,27 @@ public class Param {
 
     public Param(Map<String, Object> paramMap) {
         this.paramMap = paramMap;
+    }
+
+    /**
+     * 根据参数名获取boolean参数
+     */
+    public Boolean getBoolean(String name){
+        return CastUtil.castToBoolean(paramMap.get(name));
+    }
+
+    /**
+     * 根据参数名获取double参数
+     */
+    public double getDouble(String name){
+        return CastUtil.castToDouble(paramMap.get(name));
+    }
+
+    /**
+     * 根据参数名获取long参数
+     */
+    public long getLong(String name){
+        return CastUtil.castToLong(paramMap.get(name));
     }
 
     /**
@@ -39,4 +63,5 @@ public class Param {
     public boolean isEmpty(){
         return CollectionUtil.isEmpty(paramMap);
     }
+
 }

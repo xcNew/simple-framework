@@ -45,16 +45,22 @@ public class DispatcherServlet extends HttpServlet {
      */
     @Override
     public void init(ServletConfig config) throws ServletException {
+        long startTime = System.currentTimeMillis();
         // 初始化Helper
         HelperLoader.init();
         // 获取ServletContext对象（用于注册Servlet),该对象全局唯一，而且工程内部的所有servlet都共享这个对象
         ServletContext servletContext = config.getServletContext();
         //注册处理JSP的Servlet，效果等同于web.xml下配置servlet,只不过此处采用编码进行配置
         ServletRegistration jspServlet = servletContext.getServletRegistration("jsp");
-        jspServlet.addMapping(PropertiesConfigHelper.getAppJspPath() + "*");
+        jspServlet.addMapping(new String[]{"/index.jsp"});
+        jspServlet.addMapping(new String[]{PropertiesConfigHelper.getAppJspPath() + "*"});
         //注册处理静态资源的默认Servlet
         ServletRegistration defaultServlet = servletContext.getServletRegistration("default");
-        defaultServlet.addMapping(PropertiesConfigHelper.getAppAssetPath() + "*");
+        defaultServlet.addMapping(new String[]{"/favicon.ico"});
+        defaultServlet.addMapping(new String[]{PropertiesConfigHelper.getAppAssetPath() + "*"});
+
+        long duration = System.currentTimeMillis()-startTime;
+        LOGGER.info("初始化DispatcherServlet耗时{}ms", duration);
     }
 
     /**
@@ -63,7 +69,7 @@ public class DispatcherServlet extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        long startTime = System.currentTimeMillis();
         ServletHelper.init(req, resp);
         try {
             //获取请求方法与路径并进行封装
@@ -71,6 +77,7 @@ public class DispatcherServlet extends HttpServlet {
             String requestPath = req.getPathInfo();
             // 获取Action处理器
             Handler handler = ControllerHelper.getHandler(requestMethod, requestPath);
+            Map<Class<?>,Object> beanMap = BeanHelper.getBeanMap();
             if (handler != null) {
                 // 通过hanlder获取controller类及实例
                 Class<?> controllerClass = handler.getControllerClass();
@@ -140,7 +147,6 @@ public class DispatcherServlet extends HttpServlet {
                         String json = JsonUtil.toJson(model);
                         writer.write(json);
                         writer.flush();
-                        ;
                         writer.close();
 
                     }
@@ -152,5 +158,7 @@ public class DispatcherServlet extends HttpServlet {
         }finally {
             ServletHelper.destory();
         }
+        long duration = System.currentTimeMillis()-startTime;
+        LOGGER.info("DispatcherServlet service执行耗时{}ms",duration );
     }
 }

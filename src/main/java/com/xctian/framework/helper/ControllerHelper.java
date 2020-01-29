@@ -21,7 +21,7 @@ import java.util.Set;
 public class ControllerHelper {
 
     /**
-     * 存放Request与Handler之间的映射关系3
+     * 存放Request与Handler之间的映射关系
      */
     private static final Map<Request, Handler> ACTION_MAP = new HashMap<Request, Handler>();
 

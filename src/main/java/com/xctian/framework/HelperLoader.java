@@ -1,7 +1,11 @@
 package com.xctian.framework;
 
 import com.xctian.framework.helper.*;
+import com.xctian.framework.proxy.Proxy;
 import com.xctian.framework.utils.ClassUtil;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 各Helper初始化工具

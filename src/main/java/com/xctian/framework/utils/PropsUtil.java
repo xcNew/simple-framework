@@ -70,7 +70,8 @@ public class PropsUtil {
      */
     public static String getString(Properties properties, String key, String defaultValue) {
         String value = defaultValue;
-        if (properties.contains(key)) {
+        // 注意contains和containsKey方法的区别，避免踩坑
+        if (properties.containsKey(key)) {
             value = properties.getProperty(key);
         }
         return value;

@@ -3,6 +3,8 @@ package com.xctian.framework.helper;
 import com.xctian.framework.annotation.Controller;
 import com.xctian.framework.annotation.Service;
 import com.xctian.framework.utils.ClassUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -15,6 +17,8 @@ import java.util.Set;
  * @date 2020/1/22
  */
 public class ClassHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClassHelper.class);
     /**
      * 用于存放所加载的类
      */
@@ -71,10 +75,10 @@ public class ClassHelper {
     /**
      * 获取应用包命下某父类的所有子类(获接口的实现类)
      */
-    public static Set<Class<?>> getClassSetBySuper(Class<?> superClass){
+    public static Set<Class<?>> getClassSetBySuper(Class<?> superClass) {
         Set<Class<?>> classSet = new HashSet<Class<?>>();
-        for (Class<?> cls : CLASS_SET){
-            if(superClass.isAssignableFrom(cls)&&!superClass.equals(cls)){
+        for (Class<?> cls : CLASS_SET) {
+            if (superClass.isAssignableFrom(cls) && !superClass.equals(cls)) {
                 classSet.add(cls);
             }
         }
@@ -84,10 +88,10 @@ public class ClassHelper {
     /**
      * 获取应用包名下所有带某注解的所有类
      */
-    public static Set<Class<?>> getClassSetByAnnotation(Class<? extends Annotation> annotationClass){
+    public static Set<Class<?>> getClassSetByAnnotation(Class<? extends Annotation> annotationClass) {
         Set<Class<?>> classSet = new HashSet<Class<?>>();
-        for(Class<?> cls : CLASS_SET){
-            if(cls.isAnnotationPresent(annotationClass)){
+        for (Class<?> cls : CLASS_SET) {
+            if (cls.isAnnotationPresent(annotationClass)) {
                 classSet.add(cls);
             }
         }

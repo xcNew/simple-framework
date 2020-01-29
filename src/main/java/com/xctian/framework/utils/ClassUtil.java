@@ -42,7 +42,7 @@ public class ClassUtil {
         try {
             cls = Class.forName(className, isInitialized, getClassLoader());
         } catch (ClassNotFoundException e) {
-            LOGGER.error("类加载失败", e);
+            LOGGER.error("类加载失败：" + className, e);
             throw new RuntimeException(e);
         }
         return cls;
@@ -87,6 +87,7 @@ public class ClassUtil {
                                     if (jarEntryName.endsWith(".class")) {
                                         String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replaceAll("/", ".");
                                         doAddClass(classSet, className);
+                                        LOGGER.debug("获取类集合成功:" + className);
                                     }
                                 }
                             }
@@ -113,7 +114,7 @@ public class ClassUtil {
             // 过滤出文件夹方便后序递归调用，或者直接过滤出.class结尾的文件
             @Override
             public boolean accept(File file) {
-                return (file.isFile() && file.getName().endsWith(".class") || file.isDirectory());
+                return (file.isFile() && file.getName().endsWith(".class")) || file.isDirectory();
             }
         });
         for (File file : files) {
@@ -132,7 +133,7 @@ public class ClassUtil {
                 }
                 String subPackageName = fileName;
                 if (StringUtil.isNotEmpty(packageName)) {
-                    subPackageName = packageName + "/" + subPackageName;
+                    subPackageName = packageName + "." + subPackageName;
                 }
                 addClass(classSet, subPackagePath, subPackageName);
             }

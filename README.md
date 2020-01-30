@@ -29,6 +29,8 @@
 - Service：服务类标记注解，在服务类上使用，用以标注服务类
 - Inject：依赖注入标记注解，在成员变量上使用，用以表示将服务类依赖注入进来
 - Action：单成员注解，在控制器类中的方法上使用，用以表明该方法是处理对应请求的Action方法，含义String类型的内部成员value，用以接收请求类型与路径
+- Aspect：单成员注解，用于标记并配置切面类。内部有一个注解类型的成员，用于标明被AOP框架拦截的类
+- Transaction：事务标记注解，在Service类中的方法上使用
 
 ### Bean容器
 
@@ -58,7 +60,7 @@
 
 ### AOP和事务管理
 
-​		本项目提供的AOP框架基于注解
+​		本项目提供的AOP框架基于注解实现
 
 - 提供切面注解Aspect，它是单成员注解，内部有一个注解类型的成员，内部注解用于标明被拦截的类
 - 提供一个抽象切面类AspectProxy，只需根据业务需求定义自己的切面类，扩展AspectProxy并定义Aspect注解，然后完成特定的钩子方法，即可将横切逻辑与业务逻辑分离
@@ -68,11 +70,11 @@
 
 ## 使用说明
 
-​		本项目在提供了一个简单的web项目managementsystem，里面整合并使用了Simple-Framework进行开发，该项目用于对Simple-Framework进行简单的测试和使用说明，也可以自行选取web项目进行整合使用。本项目作为web框架并未提供ORM框架功能，与数据库交互工作需要自行完成。以下是Simple-Framework使用说明：
+​		在本项目中，提供了一个简单的web项目managementsystem，里面整合并使用了Simple-Framework进行开发，该项目用于对Simple-Framework进行简单的测试。也可以自行选取其他web项目集成本框架。本项目作为web框架并未提供ORM框架的功能，与数据库交互工作需要自行完成。以下是Simple-Framework使用说明：
 
 ### 项目导入
 
-- clone本项目到本地，使用IDEA打开，配置maven和本地仓库，等待依赖自动导入完成。
+- clone项目到本地，使用IDEA打开，配置maven和本地仓库，等待依赖自动导入完成。
 - 该项目是一个Web框架，它可以作为jar包被其他项目所依赖使用。使用maven的install命令，将项目打包到本地仓库。
 - 打开本地的web项目，pom文件中引入以下的dependency：
 
@@ -99,9 +101,9 @@ simple.framework.app.jsp_path=/WEB-INF/view/
 simple.framework.app.asset_path=/asset/
 ```
 
-其中前4项是jdbc相关配置，simple.framework.app.base_package是web应用基础包名，必须进行配置。simple.framework.app.jsp_path是JSP文件基础路径，缺省值为/WEB-INF/view/，simple.framework.app.asset_path为静态资源文件基础路径缺省值为/asset/
+其中前4项是jdbc相关配置，simple.framework.app.base_package是web应用基础包名，必须进行配置。simple.framework.app.jsp_path是JSP文件的基础路径，缺省值为/WEB-INF/view/，simple.framework.app.asset_path为静态资源文件的基础路径，缺省值为/asset/
 
-### 注解使用
+### 注解使用说明
 
 - Controller和Service是类级别的标记注解，只能使用在类上
 
@@ -180,4 +182,4 @@ AspectProxy抽象类中提供了一系列横切逻辑方法以供重写，具体
 
 ## Simple-Framework开发说明
 
-[这里](note/note.md)教你如何从零开发Soft-RPC框架，介绍本项目各个功能模块的实现要点，开发思路，以及一些学习笔记。
+[这里](note/note.md)教你如何从零开发Simple-Framework框架，介绍本项目各个功能模块的实现要点，开发思路，以及一些学习笔记。
